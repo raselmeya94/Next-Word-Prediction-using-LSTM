@@ -1,0 +1,122 @@
+{% load static %}
+{% csrf_token %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Prediction with ML</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        #input-section {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #input-box {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            resize: none;
+        }
+
+        #output-box {
+            width: 400px;
+            margin-top: 10px;
+            resize: none;
+            border: 1px solid #ccc;
+        }
+
+        #document-view {
+            flex: 1;
+            overflow-y: scroll;
+            padding: 20px;
+            text-align: center;
+        }
+
+        #predict-button {
+            width: 120px;
+            height: 40px;
+            font-size: 16px;
+            margin: 10px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <footer>
+        <p>Welcome to Word Prediction with ML</p>
+    </footer>
+
+    <div class="container">
+        <div id="input-section">
+            <p>Input your text here to predict the next word</p>
+            <textarea id="input-box" placeholder="Please enter your text..."></textarea>
+            <button id="predict-button" onclick="predictNextWord()">Predict</button>
+            <!-- your input section -->
+            <div id="result-section">
+                <!-- //here create same length of text box and show result-section text -->
+            </div>
+            <div>
+                <textarea id="output-box" placeholder="Your predicted next word..." readonly></textarea>
+            </div>
+            
+        </div>
+        
+        <div id="document-view">
+            <p>How Successful People Think(eBooks)</p>
+            <iframe src="{% static 'textbooks.txt' %}" width="100%" height="600px"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function predictNextWord() {
+            var inputText = document.getElementById('input-box').value;
+            // console.log('Input Text:', inputText);
+            // Display the input text in the result-section
+            document.getElementById('result-section').innerText = "Your Input Text: " + inputText;
+
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/predict/', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    // console.log('Response:', response);
+                    document.getElementById('output-box').value = 'Prediction: ' + response.prediction;
+                }
+            };
+
+            var csrfTokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            var csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+            // console.log('CSRF Token:', csrfToken);
+
+            xhr.send('csrfmiddlewaretoken=' + csrfToken + '&input_text=' + encodeURIComponent(inputText));
+            document.getElementById('input-box').value = '';
+        }
+    </script>
+
+</body>
+</html>
