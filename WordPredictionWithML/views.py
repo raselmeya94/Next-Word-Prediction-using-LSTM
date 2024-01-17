@@ -27,6 +27,7 @@ def predict(request):
 def predict_next_word(model, tokenizer, text):
     words = text.split()
     words = words[-3:]
+    print(words)
     sequence = tokenizer.texts_to_sequences([words])
     preds = np.argmax(model.predict(sequence))
     predicted_word = ""
